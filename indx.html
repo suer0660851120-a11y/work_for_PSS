@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>sket_slide</title>
+
+<style>
+:root{
+--primary:#6366f1;
+--bg:#f5f7fb;
+--sidebar:#111827;
+--card:#ffffff;
+}
+
+body{
+margin:0;
+font-family:system-ui;
+background:var(--bg);
+display:flex;
+height:100vh;
+}
+
+.sidebar{
+width:260px;
+background:var(--sidebar);
+color:white;
+padding:20px;
+display:flex;
+flex-direction:column;
+gap:10px;
+}
+
+.editor{
+flex:1;
+padding:15px;
+display:flex;
+flex-direction:column;
+gap:10px;
+}
+
+.card{
+background:white;
+padding:12px;
+border-radius:12px;
+box-shadow:0 5px 15px rgba(0,0,0,0.05);
+}
+
+textarea{
+width:100%;
+min-height:100px;
+padding:10px;
+border-radius:8px;
+border:1px solid #ddd;
+font-size:16px;
+}
+
+canvas{
+border-radius:12px;
+border:1px solid #ddd;
+background:white;
+touch-action:none;
+}
+
+.toolbar{
+display:flex;
+flex-wrap:wrap;
+gap:8px;
+align-items:center;
+}
+
+button{
+padding:8px 12px;
+border:none;
+border-radius:8px;
+background:var(--primary);
+color:white;
+cursor:pointer;
+}
+
+.color{
+width:26px;
+height:26px;
+border-radius:50%;
+cursor:pointer;
+border:2px solid white;
+box-shadow:0 0 0 1px #ccc;
+}
+
+@media(max-width:768px){
+body{flex-direction:column}
+.sidebar{width:100%;flex-direction:row;overflow:auto}
+}
+</style>
+</head>
+
+<body>
+
+<div class="sidebar">
+<h3>Notes</h3>
+<button onclick="saveNote()">Save</button>
+<button onclick="downloadImage()">Export</button>
+<input type="file" id="imageUpload">
+</div>
+
+<div class="editor">
+
+<div class="card">
+<textarea id="note" placeholder="พิมพ์โน้ต..."></textarea>
+</div>
+
+<div class="card">
+<canvas id="canvas" width="900" height="450"></canvas>
+</div>
+
+<div class="card toolbar">
+
+<div class="color" style="background:black" onclick="setColor('black')"></div>
+<div class="color" style="background:red" onclick="setColor('red')"></div>
+<div class="color" style="background:blue" onclick="setColor('blue')"></div>
+<div class="color" style="background:green" onclick="setColor('green')"></div>
+
+<label>Size</label>
+<input type="range" min="1" max="20" value="2" id="brushSize">
+
+<button onclick="eraser()">Eraser</button>
+<button onclick="undo()">Undo</button>
+<button onclick="redo()">Redo</button>
+<button onclick="addText()">Text</button>
+<button onclick="clearCanvas()">Clear</button>
+
+</div>
+
+</div>
+
+<script>
+
+const canvas=document.getElementById("canvas")
+const ctx=canvas.getContext("2d")
+
+let drawing=false
+let color="black"
+let brushSize=2
+let history=[]
+let redoStack=[]
+let isEraser=false
+
+canvas.addEventListener("pointerdown",start)
+canvas.addEventListener("pointerup",stop)
+canvas.addEventListener("pointermove",draw)
+
+function start(){
+drawing=true
+saveState()
+}
+
+function stop(){
+drawing=false
+ctx.beginPath()
+}
+
+function draw(e){
+if(!drawing) return
+
+const rect=canvas.getBoundingClientRect()
+const x=e.clientX-rect.left
+const y=e.clientY-rect.top
+
+ctx.lineWidth=brushSize
+ctx.lineCap="round"
+ctx.strokeStyle=isEraser?"white":color
+
+ctx.lineTo(x,y)
+ctx.stroke()
+ctx.beginPath()
+ctx.moveTo(x,y)
+}
+
+function setColor(c){
+isEraser=false
+color=c
+}
+
+function eraser(){
+isEraser=true
+}
+
+const size=document.getElementById("brushSize")
+size.addEventListener("input",()=>{
+brushSize=size.value
+})
+
+function clearCanvas(){
+ctx.clearRect(0,0,canvas.width,canvas.height)
+}
+
+function saveState(){
+history.push(canvas.toDataURL())
+}
+
+function undo(){
+if(history.length>0){
+redoStack.push(canvas.toDataURL())
+let img=new Image()
+img.src=history.pop()
+img.onload=()=>{
+ctx.clearRect(0,0,canvas.width,canvas.height)
+ctx.drawImage(img,0,0)
+}
+}
+}
+
+function redo(){
+if(redoStack.length>0){
+history.push(canvas.toDataURL())
+let img=new Image()
+img.src=redoStack.pop()
+img.onload=()=>{
+ctx.clearRect(0,0,canvas.width,canvas.height)
+ctx.drawImage(img,0,0)
+}
+}
+}
+
+function addText(){
+let text=prompt("ใส่ข้อความ")
+canvas.addEventListener("click",function place(e){
+const rect=canvas.getBoundingClientRect()
+const x=e.clientX-rect.left
+const y=e.clientY-rect.top
+
+ctx.font="20px Arial"
+ctx.fillStyle=color
+ctx.fillText(text,x,y)
+
+canvas.removeEventListener("click",place)
+})
+}
+
+function saveNote(){
+localStorage.setItem("note",document.getElementById("note").value)
+}
+
+window.onload=()=>{
+document.getElementById("note").value=localStorage.getItem("note")||""
+}
+
+function downloadImage(){
+let link=document.createElement("a")
+link.download="note.png"
+link.href=canvas.toDataURL()
+link.click()
+}
+
+const upload=document.getElementById("imageUpload")
+
+upload.addEventListener("change",function(e){
+const file=e.target.files[0]
+const reader=new FileReader()
+
+reader.onload=function(event){
+const img=new Image()
+img.onload=function(){
+ctx.drawImage(img,0,0,canvas.width,canvas.height)
+}
+img.src=event.target.result
+}
+
+reader.readAsDataURL(file)
+})
+
+</script>
+
+</body>
+</html>
+
