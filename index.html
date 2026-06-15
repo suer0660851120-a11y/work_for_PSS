@@ -1,276 +1,140 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>sket_slide</title>
-
-<style>
-:root{
---primary:#6366f1;
---bg:#f5f7fb;
---sidebar:#111827;
---card:#ffffff;
-}
-
-body{
-margin:0;
-font-family:system-ui;
-background:var(--bg);
-display:flex;
-height:100vh;
-}
-
-.sidebar{
-width:260px;
-background:var(--sidebar);
-color:white;
-padding:20px;
-display:flex;
-flex-direction:column;
-gap:10px;
-}
-
-.editor{
-flex:1;
-padding:15px;
-display:flex;
-flex-direction:column;
-gap:10px;
-}
-
-.card{
-background:white;
-padding:12px;
-border-radius:12px;
-box-shadow:0 5px 15px rgba(0,0,0,0.05);
-}
-
-textarea{
-width:100%;
-min-height:100px;
-padding:10px;
-border-radius:8px;
-border:1px solid #ddd;
-font-size:16px;
-}
-
-canvas{
-border-radius:12px;
-border:1px solid #ddd;
-background:white;
-touch-action:none;
-}
-
-.toolbar{
-display:flex;
-flex-wrap:wrap;
-gap:8px;
-align-items:center;
-}
-
-button{
-padding:8px 12px;
-border:none;
-border-radius:8px;
-background:var(--primary);
-color:white;
-cursor:pointer;
-}
-
-.color{
-width:26px;
-height:26px;
-border-radius:50%;
-cursor:pointer;
-border:2px solid white;
-box-shadow:0 0 0 1px #ccc;
-}
-
-@media(max-width:768px){
-body{flex-direction:column}
-.sidebar{width:100%;flex-direction:row;overflow:auto}
-}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Barber Booking</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Sarabun:wght@300;400;500&display=swap" rel="stylesheet" />
 </head>
-
 <body>
 
-<div class="sidebar">
-<h3>Notes</h3>
-<button onclick="saveNote()">Save</button>
-<button onclick="downloadImage()">Export</button>
-<input type="file" id="imageUpload">
-</div>
+  <!-- ===== NAVBAR ===== -->
+  <nav class="navbar">
+    <ul class="nav-links">
+      <li><a href="#home">Home</a></li>
+      <li><a href="#booking">Booking</a></li>
+      <li><a href="#queue">Queue Status</a></li>
+      <li><a href="#services">Services</a></li>
+      <li><a href="#gallery">Gallery</a></li>
+      <li><a href="#location">Location</a></li>
+      <li><a href="#news">News</a></li>
+      <li><a href="#contact">Contact us</a></li>
+    </ul>
+  </nav>
 
-<div class="editor">
+  <!-- ===== HERO ===== -->
+  <section id="home" class="hero">
+    <div class="hero-text">
+      <h1 class="hero-title">BARBER<br />BOOKING</h1>
+      <p class="hero-desc">
+        จองง่าย รู้คิวจริง ไม่ต้องรอนาน<br />
+        ยกระดับการใช้บริการร้านตัดผมด้วยระบบจองคิวออนไลน์<br />
+        ที่ช่วยให้คุณสามารถเลือกวัน เวลา และตรวจสอบจำนวนคิวที่เหลือได้แบบเรียลไทม์
+      </p>
+      <a href="#booking" class="btn-primary">Appointment</a>
+    </div>
+    <div class="hero-image">
+      <img src="hero.jpg" alt="Barber" />
+    </div>
+  </section>
 
-<div class="card">
-<textarea id="note" placeholder="พิมพ์โน้ต..."></textarea>
-</div>
+  <!-- ===== BOOKING ===== -->
+  <section id="booking" class="section booking-section">
+    <h2 class="section-title">จองคิว</h2>
+    <p class="section-sub">เลือกสาขาและกรอกข้อมูลเพื่อจองคิวของคุณ</p>
 
-<div class="card">
-<canvas id="canvas" width="900" height="450"></canvas>
-</div>
+    <div class="booking-card">
+      <!-- ขั้นตอนที่ 1: เลือกสาขา -->
+      <div class="booking-step" id="step1">
+        <h3 class="step-title">เลือกสาขา</h3>
+        <div class="branch-grid">
+          <div class="branch-card" data-branch="สาขา 1 - สยาม">
+            <span class="branch-name">สาขา 1</span>
+            <span class="branch-location">สยาม</span>
+            <span class="branch-queue" id="queue-branch1">คิวปัจจุบัน: <strong>—</strong></span>
+          </div>
+          <div class="branch-card" data-branch="สาขา 2 - อโศก">
+            <span class="branch-name">สาขา 2</span>
+            <span class="branch-location">อโศก</span>
+            <span class="branch-queue" id="queue-branch2">คิวปัจจุบัน: <strong>—</strong></span>
+          </div>
+          <div class="branch-card" data-branch="สาขา 3 - ลาดพร้าว">
+            <span class="branch-name">สาขา 3</span>
+            <span class="branch-location">ลาดพร้าว</span>
+            <span class="branch-queue" id="queue-branch3">คิวปัจจุบัน: <strong>—</strong></span>
+          </div>
+        </div>
+      </div>
 
-<div class="card toolbar">
+      <!-- ขั้นตอนที่ 2: กรอกชื่อ -->
+      <div class="booking-step" id="step2" style="display:none;">
+        <h3 class="step-title">กรอกข้อมูล</h3>
+        <div class="form-group">
+          <label for="customer-name">ชื่อของคุณ</label>
+          <input type="text" id="customer-name" placeholder="เช่น สมชาย ใจดี" />
+        </div>
+        <div class="form-group">
+          <label for="customer-phone">เบอร์โทร (ไม่บังคับ)</label>
+          <input type="tel" id="customer-phone" placeholder="0812345678" />
+        </div>
+        <div class="form-row">
+          <button class="btn-secondary" id="btn-back">← ย้อนกลับ</button>
+          <button class="btn-primary" id="btn-confirm">ยืนยันจองคิว</button>
+        </div>
+      </div>
 
-<div class="color" style="background:black" onclick="setColor('black')"></div>
-<div class="color" style="background:red" onclick="setColor('red')"></div>
-<div class="color" style="background:blue" onclick="setColor('blue')"></div>
-<div class="color" style="background:green" onclick="setColor('green')"></div>
+      <!-- ขั้นตอนที่ 3: ผลลัพธ์ -->
+      <div class="booking-step" id="step3" style="display:none;">
+        <div class="booking-result">
+          <div class="result-icon">✓</div>
+          <h3>จองคิวสำเร็จ!</h3>
+          <p id="result-name"></p>
+          <p id="result-branch"></p>
+          <div class="queue-number-box">
+            <span class="queue-label">หมายเลขคิวของคุณ</span>
+            <span class="queue-number" id="result-queue-number">—</span>
+          </div>
+          <p class="result-note">กรุณาแสดงหมายเลขคิวนี้ที่ร้าน</p>
+          <button class="btn-primary" id="btn-new-booking">จองคิวใหม่</button>
+        </div>
+      </div>
+    </div>
+  </section>
 
-<label>Size</label>
-<input type="range" min="1" max="20" value="2" id="brushSize">
+  <!-- ===== QUEUE STATUS ===== -->
+  <section id="queue" class="section queue-section">
+    <h2 class="section-title">สถานะคิว</h2>
+    <p class="section-sub">ดูคิวปัจจุบันของแต่ละสาขาแบบเรียลไทม์</p>
 
-<button onclick="eraser()">Eraser</button>
-<button onclick="undo()">Undo</button>
-<button onclick="redo()">Redo</button>
-<button onclick="addText()">Text</button>
-<button onclick="clearCanvas()">Clear</button>
+    <div class="queue-grid">
+      <div class="queue-status-card">
+        <h3>สาขา 1 — สยาม</h3>
+        <div class="queue-display">
+          <span class="queue-current-label">กำลังให้บริการคิวที่</span>
+          <span class="queue-current-number" id="serving-branch1">1</span>
+        </div>
+        <div class="queue-list" id="list-branch1"></div>
+      </div>
+      <div class="queue-status-card">
+        <h3>สาขา 2 — อโศก</h3>
+        <div class="queue-display">
+          <span class="queue-current-label">กำลังให้บริการคิวที่</span>
+          <span class="queue-current-number" id="serving-branch2">1</span>
+        </div>
+        <div class="queue-list" id="list-branch2"></div>
+      </div>
+      <div class="queue-status-card">
+        <h3>สาขา 3 — ลาดพร้าว</h3>
+        <div class="queue-display">
+          <span class="queue-current-label">กำลังให้บริการคิวที่</span>
+          <span class="queue-current-number" id="serving-branch3">1</span>
+        </div>
+        <div class="queue-list" id="list-branch3"></div>
+      </div>
+    </div>
+  </section>
 
-</div>
-
-</div>
-
-<script>
-
-const canvas=document.getElementById("canvas")
-const ctx=canvas.getContext("2d")
-
-let drawing=false
-let color="black"
-let brushSize=2
-let history=[]
-let redoStack=[]
-let isEraser=false
-
-canvas.addEventListener("pointerdown",start)
-canvas.addEventListener("pointerup",stop)
-canvas.addEventListener("pointermove",draw)
-
-function start(){
-drawing=true
-saveState()
-}
-
-function stop(){
-drawing=false
-ctx.beginPath()
-}
-
-function draw(e){
-if(!drawing) return
-
-const rect=canvas.getBoundingClientRect()
-const x=e.clientX-rect.left
-const y=e.clientY-rect.top
-
-ctx.lineWidth=brushSize
-ctx.lineCap="round"
-ctx.strokeStyle=isEraser?"white":color
-
-ctx.lineTo(x,y)
-ctx.stroke()
-ctx.beginPath()
-ctx.moveTo(x,y)
-}
-
-function setColor(c){
-isEraser=false
-color=c
-}
-
-function eraser(){
-isEraser=true
-}
-
-const size=document.getElementById("brushSize")
-size.addEventListener("input",()=>{
-brushSize=size.value
-})
-
-function clearCanvas(){
-ctx.clearRect(0,0,canvas.width,canvas.height)
-}
-
-function saveState(){
-history.push(canvas.toDataURL())
-}
-
-function undo(){
-if(history.length>0){
-redoStack.push(canvas.toDataURL())
-let img=new Image()
-img.src=history.pop()
-img.onload=()=>{
-ctx.clearRect(0,0,canvas.width,canvas.height)
-ctx.drawImage(img,0,0)
-}
-}
-}
-
-function redo(){
-if(redoStack.length>0){
-history.push(canvas.toDataURL())
-let img=new Image()
-img.src=redoStack.pop()
-img.onload=()=>{
-ctx.clearRect(0,0,canvas.width,canvas.height)
-ctx.drawImage(img,0,0)
-}
-}
-}
-
-function addText(){
-let text=prompt("ใส่ข้อความ")
-canvas.addEventListener("click",function place(e){
-const rect=canvas.getBoundingClientRect()
-const x=e.clientX-rect.left
-const y=e.clientY-rect.top
-
-ctx.font="20px Arial"
-ctx.fillStyle=color
-ctx.fillText(text,x,y)
-
-canvas.removeEventListener("click",place)
-})
-}
-
-function saveNote(){
-localStorage.setItem("note",document.getElementById("note").value)
-}
-
-window.onload=()=>{
-document.getElementById("note").value=localStorage.getItem("note")||""
-}
-
-function downloadImage(){
-let link=document.createElement("a")
-link.download="note.png"
-link.href=canvas.toDataURL()
-link.click()
-}
-
-const upload=document.getElementById("imageUpload")
-
-upload.addEventListener("change",function(e){
-const file=e.target.files[0]
-const reader=new FileReader()
-
-reader.onload=function(event){
-const img=new Image()
-img.onload=function(){
-ctx.drawImage(img,0,0,canvas.width,canvas.height)
-}
-img.src=event.target.result
-}
-
-reader.readAsDataURL(file)
-})
-
-</script>
-
+  <script src="main.js"></script>
 </body>
 </html>
-
